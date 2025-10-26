@@ -39,7 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Check for existing token on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token');
+    const storedToken = localStorage.getItem('token');
     if (storedToken) {
       verifyToken(storedToken);
     } else {
@@ -61,11 +61,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setToken(tokenToVerify);
       } else {
         // Token is invalid, remove it
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('token');
       }
     } catch (error) {
       console.error('Token verification failed:', error);
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token');
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Login successful, user:', data.user);
         setUser(data.user);
         setToken(data.token);
-        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('token', data.token);
         return true;
       } else {
         const errorData = await response.json();
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('token');
   };
 
   const value: AuthContextType = {
