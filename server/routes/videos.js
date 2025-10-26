@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import fetch from 'node-fetch';
+import { ChevronsLeftIcon } from 'lucide-react';
 import { notifyClients } from './sse.js';
 
 const router = Router();
