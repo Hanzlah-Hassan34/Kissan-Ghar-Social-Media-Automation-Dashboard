@@ -8,7 +8,7 @@ const productSchema = z.object({
   cat_id: z.number().int().nullable().optional(),
   subcat_id: z.number().int().nullable().optional(),
   pname: z.string().min(1),
-  quantity: z.string().optional().nullable(),
+  quantity: z.number().int().optional().nullable(),
   pprice: z.number().optional().nullable(),
   sprice: z.number().optional().nullable(),
   phundcustdis: z.number().optional().nullable(),
