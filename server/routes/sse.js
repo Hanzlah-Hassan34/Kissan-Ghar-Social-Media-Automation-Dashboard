@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
@@ -22,6 +23,22 @@ export function notifyClients(eventType, data) {
 
 // SSE endpoint for real-time updates
 router.get('/stream', (req, res) => {
+  // Verify token from query parameter
+  const token = req.query.token;
+  
+  if (!token) {
+    res.status(401).json({ error: 'Access token required' });
+    return;
+  }
+
+  try {
+    // Verify JWT token
+    jwt.verify(token, process.env.JWT_SECRET || 'kissan_ghar_super_secure_jwt_secret_2025');
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
+  }
+
   // Set SSE headers
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',

@@ -4,8 +4,12 @@ export function useSSE(eventTypes: string[], onEvent: (eventType: string, data: 
   const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    // Create SSE connection
-    const eventSource = new EventSource('/api/stream');
+    // Get authentication token
+    const token = localStorage.getItem('token');
+    
+    // Create SSE connection with token as query parameter
+    const url = token ? `/api/stream?token=${token}` : '/api/stream';
+    const eventSource = new EventSource(url);
     eventSourceRef.current = eventSource;
 
     // Handle incoming events
