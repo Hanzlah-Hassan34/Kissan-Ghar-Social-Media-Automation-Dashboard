@@ -40,8 +40,20 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: parse.error.flatten() });
   }
   
-  const fields = Object.keys(parse.data);
-  const values = Object.values(parse.data);
+  // Convert relative image paths to full URLs
+  const productData = { ...parse.data };
+  const baseUrl = process.env.NODE_BASE_URL || 'http://72.60.77.219:8080';
+  
+  // Convert image fields to full URLs if they start with /uploads/
+  const imageFields = ['img', 'imgb', 'imgc', 'imgd'];
+  imageFields.forEach(field => {
+    if (productData[field] && productData[field].startsWith('/uploads/')) {
+      productData[field] = `${baseUrl}${productData[field]}`;
+    }
+  });
+  
+  const fields = Object.keys(productData);
+  const values = Object.values(productData);
   const placeholders = values.map((_, i) => `$${i + 1}`).join(',');
   const cols = fields.join(',');
   const text = `INSERT INTO products (${cols}) VALUES (${placeholders}) RETURNING *`;
@@ -77,7 +89,22 @@ router.get('/', async (req, res) => {
          ORDER BY p.id DESC`;
     
     const { rows } = await req.db.query(query, q ? [`%${q}%`] : []);
-    res.json(rows);
+    
+    // Convert relative image paths to full URLs for all products
+    const baseUrl = process.env.NODE_BASE_URL || 'http://72.60.77.219:8080';
+    const imageFields = ['img', 'imgb', 'imgc', 'imgd'];
+    
+    const processedRows = rows.map(product => {
+      const processedProduct = { ...product };
+      imageFields.forEach(field => {
+        if (processedProduct[field] && processedProduct[field].startsWith('/uploads/')) {
+          processedProduct[field] = `${baseUrl}${processedProduct[field]}`;
+        }
+      });
+      return processedProduct;
+    });
+    
+    res.json(processedRows);
   } catch (e) {
     res.status(500).json({ error: 'db_error', detail: e.message });
   }
@@ -88,7 +115,19 @@ router.get('/:id', async (req, res) => {
   try {
     const { rows } = await req.db.query('SELECT * FROM products WHERE id=$1', [req.params.id]);
     if (!rows[0]) return res.status(404).json({ error: 'not_found' });
-    res.json(rows[0]);
+    
+    // Convert relative image paths to full URLs
+    const baseUrl = process.env.NODE_BASE_URL || 'http://72.60.77.219:8080';
+    const imageFields = ['img', 'imgb', 'imgc', 'imgd'];
+    
+    const product = { ...rows[0] };
+    imageFields.forEach(field => {
+      if (product[field] && product[field].startsWith('/uploads/')) {
+        product[field] = `${baseUrl}${product[field]}`;
+      }
+    });
+    
+    res.json(product);
   } catch (e) {
     res.status(500).json({ error: 'db_error', detail: e.message });
   }
