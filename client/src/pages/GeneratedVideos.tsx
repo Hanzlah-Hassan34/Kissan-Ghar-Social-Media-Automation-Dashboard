@@ -58,11 +58,7 @@ export default function GeneratedVideos() {
   async function approveTitle(v:any) {
     try {
       // Update the title in the database and trigger tags generation (backend handles this)
-      await fetch(`/api/videos/${v.generatedvideos_id}/approve-title`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title[v.id] })
-      });
+      await api.post(`/videos/${v.generatedvideos_id}/approve-title`, { title: title[v.id] });
       
       console.log('Title approved for video:', v.generatedvideos_id, '- Tags generation should be triggered by backend');
       await refresh();
@@ -73,12 +69,8 @@ export default function GeneratedVideos() {
   
   async function regenerateDescription(v:any) {
     try {
-      await fetch(`/api/videos/${v.generatedvideos_id}/generate-description`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          script: v.script
-        })
+      await api.post(`/videos/${v.generatedvideos_id}/generate-description`, {
+        script: v.script
       });
       console.log('Description regeneration started for video:', v.generatedvideos_id);
       await refresh();
@@ -96,15 +88,11 @@ export default function GeneratedVideos() {
       }
       
       // Call the new endpoint that handles the duplication fix
-      await fetch(`/api/published-videos/${v.id}/approve-and-upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          platform: pf,
-          title: title[v.id],
-          description: description[v.id],
-          tags: tags[v.id] || ''
-        })
+      await api.post(`/published-videos/${v.id}/approve-and-upload`, { 
+        platform: pf,
+        title: title[v.id],
+        description: description[v.id],
+        tags: tags[v.id] || ''
       });
       
       console.log('Description approved and upload started for video:', v.id);
@@ -116,13 +104,9 @@ export default function GeneratedVideos() {
 
   async function regenerateTags(v:any) {
     try {
-      await fetch(`/api/videos/${v.generatedvideos_id}/generate-tags`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title[v.id],
-          description: description[v.id]
-        })
+      await api.post(`/videos/${v.generatedvideos_id}/generate-tags`, {
+        title: title[v.id],
+        description: description[v.id]
       });
       console.log('Tags regeneration started for video:', v.generatedvideos_id);
       await refresh();
@@ -133,12 +117,8 @@ export default function GeneratedVideos() {
   
   async function approveTags(v:any) {
     try {
-      await fetch(`/api/videos/${v.generatedvideos_id}/approve-tags`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tags: tags[v.id]
-        })
+      await api.post(`/videos/${v.generatedvideos_id}/approve-tags`, {
+        tags: tags[v.id]
       });
       console.log('Tags approved for video:', v.generatedvideos_id);
       await refresh();

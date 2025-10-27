@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { listPublished } from '../lib/api';
+import { listPublished, api } from '../lib/api';
 import { useSSE } from '../hooks/useSSE';
 
 export default function UploadedHistory() {
@@ -9,8 +9,8 @@ export default function UploadedHistory() {
 
   async function refresh() {
     // Fetch videos with status 'uploading' or 'published' for uploaded history
-    const response = await fetch('/api/published-videos');
-    const allData = await response.json();
+    const response = await api.get('/published-videos');
+    const allData = response.data;
     const filteredData = allData.filter((item: any) => 
       item.status === 'uploading' || item.status === 'published'
     );
