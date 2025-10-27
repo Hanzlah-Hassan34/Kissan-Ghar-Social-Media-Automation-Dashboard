@@ -49,6 +49,7 @@ import { authenticateToken } from './middleware/auth.js';
 app.use('/api/auth', authRouter);
 app.use('/webhook', webhooksRouter);
 app.use('/api/webhooks/n8n', n8nWebhooksRouter);
+app.use('/api', sseRouter); // SSE validates token internally via query parameter
 
 // Protected routes (authentication required)
 app.use('/api/products', authenticateToken, productsRouter);
@@ -56,7 +57,6 @@ app.use('/api/products', authenticateToken, productsRouter);
 app.use('/api/videos', authenticateToken, videosRouter);
 app.use('/api/published-videos', authenticateToken, publishedRouter);
 app.use('/api/analytics', authenticateToken, analyticsRouter);
-app.use('/api', authenticateToken, sseRouter);
 app.use('/api/video-references', authenticateToken, videoRefsRouter);
 app.use('/api/upload', authenticateToken, uploadRouter);
 
