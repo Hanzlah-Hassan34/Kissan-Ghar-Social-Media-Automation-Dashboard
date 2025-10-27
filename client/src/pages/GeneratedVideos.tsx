@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listVideos } from '../lib/api';
+import { listVideos, api } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { webhook } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
@@ -16,16 +16,15 @@ export default function GeneratedVideos() {
 
   async function refresh() {
     // Fetch from PublishedVideos table where status = 'pending'
-    const response = await fetch('/api/published-videos?status=pending');
-    const list = await response.json();
-    setVideos(list);
+    const response = await api.get('/published-videos?status=pending');
+    setVideos(response.data);
     
     // Populate title, description, and tags fields with fetched data
     const titleData: Record<number, string> = {};
     const descriptionData: Record<number, string> = {};
     const tagsData: Record<number, string> = {};
     
-    list.forEach((video: any) => {
+    response.data.forEach((video: any) => {
       if (video.title) titleData[video.id] = video.title;
       if (video.description) descriptionData[video.id] = video.description;
       if (video.tags) tagsData[video.id] = video.tags;
@@ -46,12 +45,8 @@ export default function GeneratedVideos() {
 
   async function regenerateTitle(v:any) {
     try {
-      await fetch(`/api/videos/${v.generatedvideos_id}/generate-title`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          script: v.script
-        })
+      await api.post(`/videos/${v.generatedvideos_id}/generate-title`, {
+        script: v.script
       });
       console.log('Title regeneration started for video:', v.generatedvideos_id);
       await refresh();

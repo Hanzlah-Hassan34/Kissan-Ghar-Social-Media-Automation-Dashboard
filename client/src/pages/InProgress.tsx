@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { listVideos } from '../lib/api';
+import { listVideos, api } from '../lib/api';
 import { useSSE } from '../hooks/useSSE';
 
 export default function InProgress() {
@@ -40,30 +40,20 @@ export default function InProgress() {
   async function approveScript(v: any) {
     const content = editing[v.id];
     // Call the new API endpoint to approve script and start video generation
-    await fetch(`/api/videos/${v.id}/approve-script`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ script_content: content })
-    });
+    await api.post(`/videos/${v.id}/approve-script`, { script_content: content });
     await refresh();
   }
 
   async function regenerateScript(v: any) {
     // Call the new API endpoint to regenerate script
-    await fetch(`/api/videos/${v.id}/regenerate-script`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ language: 'English' }) // Default language
-    });
+    await api.post(`/videos/${v.id}/regenerate-script`, { language: 'English' });
     await refresh();
   }
 
   async function approveVideo(v: any) {
     try {
       // Call the approve video API endpoint which will handle both approval and title generation
-      await fetch(`/api/videos/${v.id}/approve-video`, {
-        method: 'POST'
-      });
+      await api.post(`/videos/${v.id}/approve-video`);
       
       console.log('Video approved and title generation started for video:', v.id);
       await refresh();
@@ -74,9 +64,7 @@ export default function InProgress() {
 
   async function regenerateVideo(v: any) {
     // Call the new API endpoint to regenerate video
-    await fetch(`/api/videos/${v.id}/regenerate-video`, {
-      method: 'POST'
-    });
+    await api.post(`/videos/${v.id}/regenerate-video`);
     await refresh();
   }
 
