@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listProducts, getRefs } from '../lib/api';
+import { listProducts, getRefs, api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { NeonCard, NeonButton, NeonInput, NeonSelect } from '../components/Neon';
 
@@ -65,27 +65,16 @@ export default function CreateVideo() {
     setIsSubmitting(true);
     
     try {
-      // Call the new API endpoint
-      const response = await fetch('/api/videos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          product_ids: selectedRefs,
-          prompt: prompt.trim(),
-          duration_seconds: durationSeconds,
-          screen_size: screen,
-          language
-        })
+      // Call the new API endpoint using axios (automatically adds Authorization header)
+      const response = await api.post('/videos', {
+        product_ids: selectedRefs,
+        prompt: prompt.trim(),
+        duration_seconds: durationSeconds,
+        screen_size: screen,
+        language: language
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.detail || 'Failed to create video');
-      }
-      
-      const result = await response.json();
+      const result = response.data;
       console.log('Video created:', result);
       
       // Navigate to in-progress page
