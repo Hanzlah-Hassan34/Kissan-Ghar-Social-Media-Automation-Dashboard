@@ -89,12 +89,15 @@ const tagsCallbackSchema = z.object({
 });
 
 const uploadCallbackSchema = z.object({
-  video_id: z.number().int(),
+  video_id: z.number().int().optional(),
+  published_video_id: z.number().int().optional(),
   platform: z.enum(['youtube','facebook','tiktok','instagram']),
   platform_video_id: z.string().optional(),
   url: z.string().url().optional(),
   status: z.enum(['pending','uploading','published','failed']),
   error_message: z.string().optional()
+}).refine(data => data.video_id || data.published_video_id, {
+  message: "Either video_id or published_video_id must be provided"
 });
 
 // Helper function is now imported from sse.js
@@ -417,17 +420,34 @@ router.post('/upload-callback', validateN8nToken, async (req, res) => {
     return res.status(400).json({ error: 'invalid_payload', details: parse.error.flatten() });
   }
   
-  const { video_id, platform, platform_video_id, url, status, error_message } = parse.data;
+  const { video_id, published_video_id, platform, platform_video_id, url, status, error_message } = parse.data;
   
   try {
-    // Validate video exists
+    // Use published_video_id if provided, otherwise find it from video_id
+    let publishedVideoId = published_video_id;
+    
+    // If only video_id is provided, find the corresponding published_video_id
+    if (!publishedVideoId && video_id) {
+      const { rows: publishedRows } = await req.db.query(
+        'SELECT id FROM publishedVideo WHERE generatedVideos_id=$1 AND platform=$2',
+        [video_id, platform]
+      );
+      
+      if (!publishedRows[0]) {
+        return res.status(404).json({ error: 'published_video_not_found' });
+      }
+      
+      publishedVideoId = publishedRows[0].id;
+    }
+    
+    // Validate published video exists
     const { rows: videoRows } = await req.db.query(
-      'SELECT id FROM generatedVideos WHERE id=$1',
-      [video_id]
+      'SELECT id FROM publishedVideo WHERE id=$1',
+      [publishedVideoId]
     );
     
     if (!videoRows[0]) {
-      return res.status(404).json({ error: 'video_not_found' });
+      return res.status(404).json({ error: 'published_video_not_found' });
     }
     
     // Update published video record
@@ -457,16 +477,16 @@ router.post('/upload-callback', validateN8nToken, async (req, res) => {
       updateValues.push('Uploading');
     }
     
-    updateValues.push(video_id, platform);
+    updateValues.push(publishedVideoId);
     
     await req.db.query(
-      `UPDATE publishedVideo SET ${updateFields.join(', ')} WHERE generatedVideos_id=$${paramCount} AND platform=$${paramCount + 1}`,
+      `UPDATE publishedVideo SET ${updateFields.join(', ')} WHERE id=$${paramCount}`,
       updateValues
     );
     
     // Notify clients
     notifyClients('upload_update', {
-      video_id,
+      video_id: publishedVideoId,
       platform,
       status,
       platform_video_id,
