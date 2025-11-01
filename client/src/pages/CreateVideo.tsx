@@ -15,7 +15,7 @@ const sizes = ['1:1','9:16','16:9','4:5','full'] as const;
 
 export default function CreateVideo() {
   const [prompt, setPrompt] = useState('');
-  const [durationSeconds, setDurationSeconds] = useState(90);
+  const [durationSeconds, setDurationSeconds] = useState(60);
   const [screen, setScreen] = useState<'1:1'|'9:16'|'16:9'|'4:5'|'full'>('16:9');
   const [language, setLanguage] = useState('English');
   const [refs, setRefs] = useState<any[]>([]);
@@ -113,7 +113,7 @@ export default function CreateVideo() {
               <NeonInput 
                 type="number"
                 min="1"
-                placeholder="90"
+                placeholder="60"
                 value={durationSeconds}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDurationSeconds(parseInt(e.target.value) || 0)}
                 className={errors.duration ? 'border-red-500' : ''}
