@@ -17,7 +17,7 @@ export default function CreateVideo() {
   const [prompt, setPrompt] = useState('');
   const [durationSeconds, setDurationSeconds] = useState(60);
   const [screen, setScreen] = useState<'1:1'|'9:16'|'16:9'|'4:5'|'full'>('16:9');
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] = useState('Urdu');
   const [refs, setRefs] = useState<any[]>([]);
   const [companyById, setCompanyById] = useState<Record<number, string>>({});
   const [categoryById, setCategoryById] = useState<Record<number, string>>({});
