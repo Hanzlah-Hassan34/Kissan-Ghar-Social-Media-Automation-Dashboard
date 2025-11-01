@@ -374,7 +374,7 @@ router.post('/:videoId/regenerate-video', async (req, res) => {
     console.log("referenceRows (first 3–4):", referenceRows.slice(0, 4));
 
     console.log("referenceProductIds (mapped):", referenceProductIds);
-    console.log("referenceProducts (from getProductSnapshots):", referenceProducts);
+    console.log("productSnapshots (from getProductSnapshots):", productSnapshots);
 
     // Call n8n video webhook
     const n8nPayload = {
